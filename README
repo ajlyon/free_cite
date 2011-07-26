@@ -1,8 +1,7 @@
-# Install instructions from a SuSE 10.1 development environment
-
 == Install required packages ==
+Install CRF++ from http://sourceforge.net/projects/crfpp/files/crfpp/
+Versions 0.47 and 0.54 tested, change paths and filenames below accordingly.
 
-wget http://superb-west.dl.sourceforge.net/sourceforge/crfpp/CRF++-0.47.tar.gz
 tar xvzf CRF++-0.47.tar.gz
 cd CRF++-0.47
 ./configure && make && sudo make install
@@ -11,19 +10,25 @@ ruby extconf.rb
 make
 sudo make install
 
-If you are running fedora, you will have to take these additional steps:
+If you are running Fedora, you will have to take these three additional steps:
 su
 echo "/usr/local/lib" > /etc/ld.so.conf.d/default-i386.conf
 ldconfig
 
-sudo gem install -v=2.1 rails
-gem install ruby-postgres
+sudo gem install rails
+sudo gem install rake
+sudo gem install ruby-pg
+
+Originally used ruby-postgres, but that package is no longer maintained.
+It may be necessary to add the gems binary directory to your PATH:
+export PATH=${PATH}:/var/lib/gems/1.8/bin
 
 == Configure Postgres ==
 
 sudo gem install ruby-postgres
 
 # as postgres
+sudo su postgres
 
 initdb
 pg_ctl -D /var/lib/pgsql/data -l logfile start
@@ -40,6 +45,22 @@ GRANT ALL ON DATABASE "freecite_development" TO freecite;
 GRANT ALL ON DATABASE "freecite_production" TO freecite;
 GRANT ALL ON DATABASE "freecite_test" TO freecite;
 \q
+
+# log out of postgres
+exit
+
+== Configure and start server ==
+# From the free_cite directory
+cp config/database.yml.example config/database.yml
+
+rake
+rake db:migrate
+
+# Edit the configuration file to use the database password set above
+nano config/database.yml
+
+# Start the built-in WEBrick server
+ruby script/server
 
 == Train the model == 
 
